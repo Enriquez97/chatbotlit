@@ -12,7 +12,7 @@ LOGO_NISIRA = "https://www.nisira.com.pe/images/Logo/logo2.png"
 #fig = px.pie(long_df, labels="nation", values="count", title="Long-Form Input")
 
 st.set_page_config(
-    page_title="NisiraBot",
+    page_title="ChatBot",
     page_icon=LOGO_NISIRA,
     #layout="wide",
     initial_sidebar_state="expanded",
@@ -22,7 +22,7 @@ st.set_page_config(
 )
 #col1, col2= st.columns(2, gap='small')
 #with col1:
-st.header('Nisira Bot')
+st.header('ChatBot')
     
 #with col2:
     #st.image(LOGO_NISIRA,use_column_width = False, width = 80)

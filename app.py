@@ -50,16 +50,12 @@ with st.sidebar:
     st.title('Chat App')    
     st.markdown('''
     ## Test 
-    This app is an LLM-powered chatbot built using:
-    - Streamlit
-    - LangChain
-    - OpenAI LLM model
  
     ''')
     add_vertical_space(5)
     st.write('Nisira Systems')
 def main():
-    st.header("Chatbot Nisira 💬")
+    st.header("Chatbot Nisira")
     text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
@@ -78,9 +74,10 @@ def main():
         with st.chat_message(message["role"],avatar=avatar_rol):
             st.markdown(message["content"])
     ##
-    
-    query = st.chat_input("Cual es su consulta?")    
-    if query:
+
+    if query:= st.chat_input("Cual es su consulta?"):
+        messages = st.container()   
+        messages.chat_message("user").write(query)
         docs = VectorStore.similarity_search(query=query, k=3)
  
         llm = OpenAI()#
@@ -88,7 +85,8 @@ def main():
         with get_openai_callback() as cb:
             response = chain.run(input_documents=docs, question=query)
             print(cb)
-        st.write(response)  
+        messages.chat_message("assistant",avatar=LOGO_NISIRA).write(response)
+        #st.write(response)  
  
         
 

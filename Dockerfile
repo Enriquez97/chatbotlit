@@ -3,7 +3,7 @@ FROM python:3.10-slim
 COPY . /app
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y apt-transport-https\
     build-essential \
     curl \
     software-properties-common \

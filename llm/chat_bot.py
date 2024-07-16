@@ -50,7 +50,7 @@ load_dotenv()
 
 
 
-st.header("Chatbot Nisira :robot_face:")
+st.header("Chatbot Cartillas :robot_face:")
 text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
@@ -71,17 +71,17 @@ for message in st.session_state.messages:
     ##
 
 if query:= st.chat_input("Cual es su consulta?"):
-        messages = st.container()   
-        messages.chat_message("user").write(query)
-        docs = VectorStore.similarity_search(query=query, k=3)
+    messages = st.container()   
+    messages.chat_message("user").write(query)
+    docs = VectorStore.similarity_search(query=query, k=3)
  
-        llm = OpenAI()#
-        chain = load_qa_chain(llm=llm, chain_type="stuff")
-        with get_openai_callback() as cb:
-            response = chain.run(input_documents=docs, question=query)
-            with st.sidebar:
-                st.title('Precio por query')    
-                st.write(cb)  
+    llm = OpenAI()#
+    chain = load_qa_chain(llm=llm, chain_type="stuff")
+    with get_openai_callback() as cb:
+        response = chain.run(input_documents=docs, question=query)
+        with st.sidebar:
+            st.title('Precio por query')    
+            st.write(cb)  
                 #add_vertical_space(5)
-                st.write('Nisira Systems')
-        messages.chat_message("assistant",avatar=LOGO_NISIRA).write(response)
+            st.write('Nisira Systems')
+    messages.chat_message("assistant",avatar=LOGO_NISIRA).write(response)

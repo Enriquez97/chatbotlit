@@ -13,7 +13,7 @@ st.set_page_config(
 if "role" not in st.session_state:
     st.session_state.role = None
 
-ROLES = [None, "Requester", "Responder", "Admin","Test"]
+ROLES = [None,"Test"]#, "Requester", "Responder", "Admin",
 
 
 def login():

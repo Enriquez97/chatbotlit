@@ -58,14 +58,15 @@ with columns[4]:
         df = df[df["CONSUMIDOR"]==selected_lote]
 
 dff = df.groupby(["AÑO_CULTIVO","DSCVARIABLE"])[["CANTIDAD"]].sum().reset_index()
-st_df = df.groupby(["AÑO_CULTIVO","week"])[["CANTIDAD"]].sum().reset_index()
+
 #st.dataframe(df)
+multi_selection = alt.selection_point(name="multi", toggle=True, encodings=["x"])
 c = (
    alt.Chart(dff)
    .mark_bar()
    .encode(x="AÑO_CULTIVO", 
            y="CANTIDAD",#alt.Y('Partidas').sort('-x'),
-           #color = "DSCVARIABLE",
+           color = alt.condition(multi_selection, "AÑO_CULTIVO:N", alt.value("lightgray"),),
            text="CANTIDAD", 
            tooltip=["AÑO_CULTIVO", "CANTIDAD"],
            
@@ -73,54 +74,100 @@ c = (
    .properties(
     title=f'Cultivos por Campaña ({select_cultivo})',
     height=400
-    )
+    ).add_params(multi_selection)
 )
 
 
-hover = alt.selection_single(
+
+columns_graph = st.columns(2)
+with columns_graph[0]:
+    event_data = st.altair_chart(c, use_container_width=True,theme="streamlit",on_select="rerun")
+    
+with columns_graph[1]:
+    
+    hover = alt.selection_single(
     fields=["week"],
     nearest=True,
     on="mouseover",
     empty="none",
-)
-
-
-d = (
-   alt.Chart(st_df)
-   .mark_line()
-   .encode(x="week", 
-           y="CANTIDAD",#alt.Y('Partidas').sort('-x'),
-           color = alt.Color('AÑO_CULTIVO').title("Campaña"),
-           text="CANTIDAD", 
-           tooltip=["AÑO_CULTIVO","week", "CANTIDAD"],
-           
     )
-   .properties(
-    title=f'{select_recurso} por Semana',
-    height=400
-    )
-)
-points = d .transform_filter(hover).mark_circle(size=65)
-
-tooltips = (
+    ## df pross
+    st_df = df.groupby(["AÑO_CULTIVO","week"])[["CANTIDAD"]].sum().reset_index()
+    campaña = event_data["selection"]["multi"]#[0]["AÑO_CULTIVO"]
+    if len(campaña) == 1:
+       st_df = st_df[st_df["AÑO_CULTIVO"]==campaña[0]["AÑO_CULTIVO"]] 
+    d = (
     alt.Chart(st_df)
-    .mark_rule()
-    .encode(
-        x="week",
-        y="CANTIDAD",
-        opacity=alt.condition(hover, alt.value(0.3), alt.value(0)),
-        tooltip=[
-            alt.Tooltip("week", title="Semana"),
-            alt.Tooltip("AÑO_CULTIVO", title="Campaña"),
-            alt.Tooltip("CANTIDAD", title="Cantidad"),
-        ],
+    .mark_line()
+    .encode(x="week", 
+            y="CANTIDAD",#alt.Y('Partidas').sort('-x'),
+            color = alt.Color('AÑO_CULTIVO').title("Campaña"),
+            text="CANTIDAD", 
+            tooltip=["AÑO_CULTIVO","week", "CANTIDAD"],
+            
+        )
+    .properties(
+        title=f'{select_recurso} por Semana',
+        height=400
+        )
     )
-    .add_selection(hover)
-)
-data_layer = d + points + tooltips
-columns_graph = st.columns(2)
-with columns_graph[0]:
-    st.altair_chart(c, use_container_width=True,theme="streamlit")
+    points = d .transform_filter(hover).mark_circle(size=65)
 
-with columns_graph[1]:
+    tooltips = (
+        alt.Chart(st_df)
+        .mark_rule()
+        .encode(
+            x="week",
+            y="CANTIDAD",
+            opacity=alt.condition(hover, alt.value(0.3), alt.value(0)),
+            tooltip=[
+                alt.Tooltip("week", title="Semana"),
+                alt.Tooltip("AÑO_CULTIVO", title="Campaña"),
+                alt.Tooltip("CANTIDAD", title="Cantidad"),
+            ],
+        )
+        .add_selection(hover)
+    )
+    data_layer = d + points + tooltips
     st.altair_chart(data_layer, use_container_width=True,theme="streamlit")
+    
+col_pie, col_lote= st.columns([4,8])   
+with col_pie:
+    var_df = df.groupby(["VARIEDAD"])[["CANTIDAD"]].sum().reset_index()  
+    campaña = event_data["selection"]["multi"]#[0]["AÑO_CULTIVO"]
+    if len(campaña) == 1:
+        var_df = df.groupby(["VARIEDAD","AÑO_CULTIVO"])[["CANTIDAD"]].sum().reset_index() 
+        var_df = var_df[var_df["AÑO_CULTIVO"]==campaña[0]["AÑO_CULTIVO"]]   
+
+    base =alt.Chart(var_df).mark_arc(innerRadius=50).encode(
+        theta="CANTIDAD:Q",
+        color="VARIEDAD:N",
+    ).properties(
+        title=f'Variedades',
+        height=300
+    )
+
+    st.altair_chart(base, use_container_width=True,theme="streamlit")
+
+with col_lote:
+    lote_df = df.groupby(["CONSUMIDOR"])[["CANTIDAD"]].sum().reset_index()
+    campaña = event_data["selection"]["multi"]
+    if len(campaña) == 1:
+        lote_df = df.groupby(["CONSUMIDOR","AÑO_CULTIVO"])[["CANTIDAD"]].sum().reset_index() 
+        lote_df = lote_df[lote_df["AÑO_CULTIVO"]==campaña[0]["AÑO_CULTIVO"]]
+    bar_lotes = (
+    alt.Chart(lote_df)
+    .mark_bar()
+    .encode(x="CONSUMIDOR", 
+            y="CANTIDAD",#alt.Y('Partidas').sort('-x'),
+            #color = alt.condition(multi_selection, "AÑO_CULTIVO:N", alt.value("lightgray"),),
+            text="CANTIDAD", 
+            tooltip=["CONSUMIDOR", "CANTIDAD"],
+            
+        )
+    .properties(
+        title=f'Lotes',
+        height=300
+        )
+    )
+    st.altair_chart(bar_lotes, use_container_width=True,theme="streamlit")

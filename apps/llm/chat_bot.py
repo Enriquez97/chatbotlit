@@ -1,4 +1,5 @@
 import streamlit as st
+import warnings
 import pickle
 import os
 from dotenv import load_dotenv
@@ -8,31 +9,15 @@ from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.embeddings import OpenAIEmbeddings
 from langchain_community.vectorstores import FAISS
 from langchain_community.llms import OpenAI
+
 from langchain.chains.question_answering import load_qa_chain
 from langchain_community.callbacks.manager import get_openai_callback
+from constants import LOGO_NISIRA
+from utils.styles import style_sidebar_cb,styles
 
-LOGO_NISIRA = "https://www.nisira.com.pe/images/Logo/logo2.png"
 
+style_sidebar_cb()
 
-st.set_page_config(
-    page_title="ChatBot",
-    page_icon=LOGO_NISIRA,
-    #layout="wide",
-    initial_sidebar_state="expanded",
-    menu_items={
-        'About': "Nisira System"
-    }
-)
-st.markdown(
-    """
-    <style>
-        section[data-testid="stSidebar"] {
-            width: 450px !important; # Set the width to your desired value
-        }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
 #col1, col2= st.columns(2, gap='small')
 #with col1:
 def list_files_in_directory(directory):
@@ -58,47 +43,38 @@ texto = pdf_text(list_files_in_directory("./source"))
 load_dotenv()
 
 
-def main():
-    st.header("Chatbot Nisira")
-    text_splitter = RecursiveCharacterTextSplitter(
+
+st.header("Chatbot Cartillas :robot_face:")
+text_splitter = RecursiveCharacterTextSplitter(
             chunk_size=1000,
             chunk_overlap=200,
             length_function=len
             )
-    chunks = text_splitter.split_text(text=texto)
-    embeddings = OpenAIEmbeddings()
-    VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
+chunks = text_splitter.split_text(text=texto)
+embeddings = OpenAIEmbeddings()
+VectorStore = FAISS.from_texts(chunks, embedding=embeddings)
     ##
-    if "messages" not in st.session_state:
+if "messages" not in st.session_state:
         st.session_state.messages = []
 
     # Display chat messages from history on app rerun
-    for message in st.session_state.messages:
+for message in st.session_state.messages:
         avatar_rol = None if message["role"] == "user" else LOGO_NISIRA
         with st.chat_message(message["role"],avatar=avatar_rol):
             st.markdown(message["content"])
     ##
 
-    if query:= st.chat_input("Cual es su consulta?"):
-        messages = st.container()   
-        messages.chat_message("user").write(query)
-        docs = VectorStore.similarity_search(query=query, k=3)
+if query:= st.chat_input("Cual es su consulta?"):
+    messages = st.container()   
+    messages.chat_message("user").write(query)
+    docs = VectorStore.similarity_search(query=query, k=3)
  
-        llm = OpenAI()#
-        chain = load_qa_chain(llm=llm, chain_type="stuff")
-        with get_openai_callback() as cb:
-            response = chain.run(input_documents=docs, question=query)
-            with st.sidebar:
-                st.title('Precio por query')    
-                st.write(cb)  
-                #add_vertical_space(5)
-                st.write('Nisira Systems')
-        messages.chat_message("assistant",avatar=LOGO_NISIRA).write(response)
-        
-
-        
-
-if __name__ == '__main__':
-    main()
-    
-    
+    llm = OpenAI()#
+    chain = load_qa_chain(llm=llm, chain_type="stuff")
+    with get_openai_callback() as cb:
+        response = chain.run(input_documents=docs, question=query)
+        with st.sidebar:
+            st.title('Precio por query')    
+            st.write(cb)  
+            
+    messages.chat_message("assistant",avatar=LOGO_NISIRA).write(response)

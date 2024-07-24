@@ -4,32 +4,14 @@ import numpy as np
 import altair as alt
 import plotly.express as px
 import altair as alt
-#from menu import menu_with_redirect
-from vega_datasets import data
-import altair as alt
-from streamlit_dynamic_filters import DynamicFilters
 
-# Redirect to app.py if not logged in, otherwise show the navigation menu
-#menu_with_redirect()
-st.markdown("""
-        <style>
-               .block-container {
-                    padding-top: 1rem;
-                    padding-bottom: 0rem;
-                    padding-left: 5rem;
-                    padding-right: 5rem;
-                }
-                [data-testid="stVerticalBlockBorderWrapper"]{
-                    padding: 1px;
-                }
-        </style>
-""", unsafe_allow_html=True)
-# Verify the user's role
-if st.session_state.role not in ["Test"]:
-    st.warning("You do not have permission to view this page.")
-    st.stop()
-    
-df = pd.read_parquet('./data/agricola_.parquet', engine='pyarrow')
+import altair as alt
+
+from utils.styles import styles
+
+styles(pt=1)
+
+df = pd.read_parquet('./source/data/agricola_.parquet', engine='pyarrow')
 print(df.columns)
 st.title("Ejecución de Campaña :herb:")
 

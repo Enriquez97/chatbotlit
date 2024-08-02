@@ -241,7 +241,7 @@ class Finanzas:
                 selected_formato =st.selectbox("Formato",list(sorted(df_bg["formato"].unique())))
             df_bg = df_bg[df_bg['formato'] == selected_formato]
             with col_year:
-                selected_year =st.multiselect("Año",list(sorted(df_bg["Año"].unique())), [years[-1],years[-2]])
+                selected_year =st.multiselect("Año",list(sorted(df_bg["Año"].unique())), [years[-1]])
                 if len(selected_year) > 0:
                     df_bg = df_bg[df_bg['Año'].isin(selected_year) ]
             with col_tri:
@@ -311,7 +311,7 @@ class Finanzas:
                 selected_formato =st.selectbox("Formato",list(sorted(df_bg["formato"].unique())))
             df_bg = df_bg[df_bg['formato'] == selected_formato]
             with col_year:
-                selected_year =st.multiselect("Año",list(sorted(df_bg["Año"].unique())), [years[-1],years[-2]])
+                selected_year =st.multiselect("Año",list(sorted(df_bg["Año"].unique())), [years[-1]])
                 if len(selected_year) > 0:
                     df_bg = df_bg[df_bg['Año'].isin(selected_year) ]
             with col_tri:

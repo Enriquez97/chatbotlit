@@ -4,6 +4,7 @@ from apps.home import*
 from apps.comercial.dashboards import Comercial
 from apps.logistica.dashboards import Logistica
 from apps.finanzas.dashboards import Finanzas
+from apps.produccion.ejecucion_cam import Produccion
 page_dict = {}
 
 account_pages = [
@@ -13,11 +14,12 @@ account_pages = [
 
 
 produccion = [
-    st.Page("./apps/produccion/ejecucion_cam.py",title="Ejecución Campaña",icon = ":material/psychiatry:",),
-    st.Page("./apps/produccion/costos_cam.py",title="Costos Campaña",icon = ":material/psychiatry:",)
+    st.Page(Produccion.ejecucion_campania,title="Ejecución Campaña",icon = ":material/psychiatry:",),
+    st.Page(Produccion.costos_campania,title="Costos Campaña",icon = ":material/psychiatry:",)
 ]
 page_dict["Home"] = [
-    st.Page(home,title="Home",icon = ":material/home:",)
+    st.Page(home,title="Home",icon = ":material/home:",),
+    
 ]
 
 page_dict["Finanzas"] = [
@@ -34,7 +36,8 @@ page_dict["Comercial"] = [
 
 page_dict["Logistica"] = [
     st.Page(Logistica.stocks,title="Stocks",icon = ":material/inventory:",),
-    st.Page(Logistica.estado_inventario,title="Estado de Inventario",icon = ":material/inventory:",)
+    st.Page(Logistica.estado_inventario,title="Estado de Inventario",icon = ":material/inventory:"),
+    st.Page(Logistica.gestion_stock,title="Gestión de Stock",icon = ":material/inventory:",)
 ]
 
 page_dict["LLM"] = [

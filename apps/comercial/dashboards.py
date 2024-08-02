@@ -8,7 +8,7 @@ from utils.styles import styles
 from utils.api import APIConnector,send_get_dataframe
 from utils.data_transform import *
 from utils.charts_altair import ALTAIR
-from apps.login import cookies
+
 
 
 class Comercial:
@@ -16,8 +16,6 @@ class Comercial:
     #    self.ip = ip
     #    self.token = token
     def informe_ventas():
-        cookies['username'] = st.session_state['username']
-        cookies.save()
         styles(pt=1)    
         
         if st.session_state['servicio_ip']:
@@ -25,6 +23,7 @@ class Comercial:
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_rpt_ventas_detallado")
             dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_rpt_ventas_detallado")
             df = transform_nsp_rpt_ventas_detallado(dataframe)
+            
             print(df.columns)
             
             st.title("Informe de Ventas")

@@ -1,12 +1,12 @@
 import streamlit as st
 from utils.auth import authenticate
 from streamlit_cookies_manager import EncryptedCookieManager
-cookies = EncryptedCookieManager(
-    prefix="streamlit_login_",
-    password="my_secret_password",  # Cambia esto a una contraseña segura
-)
-if not cookies.ready():
-    st.stop()
+#cookies = EncryptedCookieManager(
+#    prefix="streamlit_login_",
+#    password="my_secret_password",  # Cambia esto a una contraseña segura
+#)
+#if not cookies.ready():
+#    st.stop()
 
 def login_2():
     st.markdown("""
@@ -64,10 +64,10 @@ def login_2():
                 
                 st.session_state['username'] = username   
                 st.session_state['logged_in'] = authenticated_user
-                cookies["username"] = username
+                #cookies["username"] = username
                 
                 st.success(f"Bienvenido {authenticated_user[0]}")
-                cookies.save()
+                #cookies.save()
                 st.rerun()
             else:
                 st.error("Usuario o contraseña incorrectos")

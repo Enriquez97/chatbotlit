@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.styles import styles
-from apps.login import cookies
+
 
 def home():
     styles()

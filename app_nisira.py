@@ -1,7 +1,6 @@
 import streamlit as st
 from constants import LOGO_NISIRA
 from apps.login import login_2
-from apps.login import cookies
 from routes import page_dict,account_pages
 from utils.auth import get_data_user
 from utils.data_transform import decoding_avatar
@@ -16,14 +15,14 @@ st.set_page_config(
         #initial_sidebar_state="auto",
     )
 
-    #if 'logged_in' not in st.session_state:
-    #    st.session_state['logged_in'] = False
-if "logged_in" not in st.session_state:
-    if "username" in cookies and cookies["username"]:
-            st.session_state['username'] = cookies["username"]
-            st.session_state['logged_in'] = True
-    else:
-            st.session_state['logged_in'] = False
+if 'logged_in' not in st.session_state:
+        st.session_state['logged_in'] = False
+#if "logged_in" not in st.session_state:
+#    if "username" in cookies and cookies["username"]:
+#            st.session_state['username'] = cookies["username"]
+#            st.session_state['logged_in'] = True
+#    else:
+#            st.session_state['logged_in'] = False
         
 #if 'username' not in st.session_state:
 #        st.session_state['username'] = ''

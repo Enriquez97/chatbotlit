@@ -18,6 +18,7 @@ class Logistica:
             dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_stocks")
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_stocks")
             df = transform_nsp_stocks(dataframe)
+            
             #print(df.columns)
             
             col_row_head = st.columns([4,2,2,2,1])
@@ -81,13 +82,14 @@ class Logistica:
             )
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_stocks")
             df = transform_stockalmval(dataframe)
+            
             df['Última Fecha Ingreso']=df['Última Fecha Ingreso'].apply(lambda a: pd.to_datetime(a).date())
             #print(df.columns)
             first_date =str(df['Última Fecha Ingreso'].min())
             first_datetype =date(int(first_date[:4]),int(first_date[-5:-3]),int(first_date[-2:]))
             last_datetype = datetime.now()
             st.title("Estado de Inventario")
-            print(df.info())
+            
             col_row_1 = st.columns(6)
             with col_row_1[0]:
                 selected_date_first = st.date_input(label = "Fecha Inicio", value = first_datetype, min_value = first_datetype, max_value=last_datetype)
@@ -152,7 +154,7 @@ class Logistica:
                 consumos_api_alm_df = executor.submit(send_get_dataframe,st.session_state['servicio_ip'],st.session_state['servicio_key'],consumoalm_params,"NSP_OBJREPORTES_CONSUMOSALM_DET_BI").result()
                 saldos_api_alm_df = executor.submit(send_get_dataframe,st.session_state['servicio_ip'],st.session_state['servicio_key'],saldosalm_params,"NSP_OBJREPORTES_SALDOSALMACEN_BI").result()
             
-           
+            
             saldos_api_alm_df = change_cols_saldosalm(saldos_api_alm_df)
             #input_df = saldos_api_alm_df.groupby(['SUCURSAL','ALMACEN','DSC_GRUPO','DSC_SUBGRUPO','MARCA'])[['STOCK']].sum().reset_index()
             #print(consumos_api_alm_df,saldos_api_alm_df)

@@ -17,6 +17,7 @@ class Finanzas:
         if st.session_state['servicio_ip']:
             dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
             df_bg = transform_nsp_etl_situacion_financiera(df=dataframe)
+            
             df_bg["Año"] = df_bg["Año"].astype("string")
             df_bg["Trimestre"] = df_bg["Trimestre"].astype("string")
             df_bg["Mes_"] = df_bg["Mes_"].astype("string")

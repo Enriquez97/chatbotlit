@@ -15,14 +15,18 @@ class Finanzas:
     def balance_general():
         styles(pt=1)
         if st.session_state['servicio_ip']:
-            dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
+            if st.session_state['empresa_name'] == "GRUPO RESEDISA S.A.C.":
+                dataframe =  pd.read_parquet("source/data/RESEDISA/nsp_etl_situacion_financiera_resedisa.parquet")
+            else:
+                dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
             df_bg = transform_nsp_etl_situacion_financiera(df=dataframe)
             
             df_bg["Año"] = df_bg["Año"].astype("string")
             df_bg["Trimestre"] = df_bg["Trimestre"].astype("string")
             df_bg["Mes_"] = df_bg["Mes_"].astype("string")
-
+            test_dff = df_bg.groupby(["titulo1","titulo2","titulo3"]).count().reset_index()
             st.title("Balance General")
+            st.dataframe(test_dff)
             col_formato,col_year,col_tri,col_mes,col_moneda= st.columns([3,2,2,2,1])
 
             with col_formato:
@@ -125,9 +129,12 @@ class Finanzas:
 
             st.dataframe(df)
     def balance_ap():
-        styles(pt=3)
+        styles(pt=1)
         if st.session_state['servicio_ip']:
-            dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
+            if st.session_state['empresa_name'] == "GRUPO RESEDISA S.A.C.":
+                dataframe =  pd.read_parquet("source/data/RESEDISA/nsp_etl_situacion_financiera_resedisa.parquet")
+            else:
+                dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
             df_bg = transform_nsp_etl_situacion_financiera(df=dataframe)
             df_bg["Año"] = df_bg["Año"].astype("string")
             df_bg["Trimestre"] = df_bg["Trimestre"].astype("string")
@@ -226,9 +233,12 @@ class Finanzas:
             col_3_row = st.columns(1)
             col_3_row[0].plotly_chart(fig_pasivo)
     def analisis_activo():
-        styles(pt=3)
+        styles(pt=1)
         if st.session_state['servicio_ip']:
-            dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
+            if st.session_state['empresa_name'] == "GRUPO RESEDISA S.A.C.":
+                dataframe =  pd.read_parquet("source/data/RESEDISA/nsp_etl_situacion_financiera_resedisa.parquet")
+            else:
+                dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
             df_bg = transform_nsp_etl_situacion_financiera(df=dataframe)
             df_bg["Año"] = df_bg["Año"].astype("string")
             years=sorted(df_bg['Año'].unique())
@@ -296,9 +306,12 @@ class Finanzas:
             col_2_row[1].plotly_chart(fig_bar)
             
     def analisis_pasivo():
-        styles(pt=3)
+        styles(pt=1)
         if st.session_state['servicio_ip']:
-            dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
+            if st.session_state['empresa_name'] == "GRUPO RESEDISA S.A.C.":
+                dataframe =  pd.read_parquet("source/data/RESEDISA/nsp_etl_situacion_financiera_resedisa.parquet")
+            else:
+                dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_etl_situacion_financiera")
             df_bg = transform_nsp_etl_situacion_financiera(df=dataframe)
             df_bg["Año"] = df_bg["Año"].astype("string")
             years=sorted(df_bg['Año'].unique())

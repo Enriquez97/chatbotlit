@@ -29,7 +29,7 @@ def pie_(df = pd.DataFrame(),label_col = '',
              value_col = '',list_or_color = None, dict_color = None,
              title = '', textinfo = 'percent+label+value' , textposition = 'inside',
              height = 300, showlegend = True, color_list = [], textfont_size = 12, hole = 0,
-             
+             title_font_size = 18,t=60, b=60, l=60, r=60
              
     ):
         if dict_color != None:
@@ -49,10 +49,10 @@ def pie_(df = pd.DataFrame(),label_col = '',
                 rotation=10,
                 )
         )    
-        figure.update_layout(title=title,title_font_size = 18)
+        figure.update_layout(title=title,title_font_size = title_font_size)
         figure.update_traces(textposition = textposition, textinfo = textinfo, hole = hole)
         figure.update_traces(hoverinfo='label+percent+value', textfont_size = textfont_size)
-        figure.update_layout(height = height,margin = dict(t=60, b=60, l=60, r=60),showlegend = showlegend)
+        figure.update_layout(height = height,margin = dict(t=t, b=b, l=l, r=r),showlegend = showlegend)
         figure.update_layout(legend=dict(font=dict(size=10)))
         return figure
 
@@ -114,7 +114,7 @@ def figure_stock_var_y2(df = None, height = 450 , moneda = 'Soles', title = ""):
     name = "Stock Valorizado",
     cliponaxis=False,
     #marker=dict(color="rgb(29,105,125)"),
-    hovertemplate ='<br>'+'Periodo'+': <b>%{x}</b><br>'+var_numerica+': <b>%{y}</b>',hoverlabel=dict(font_size=15,bgcolor="white")
+    hovertemplate ='<br>'+'Periodo'+': <b>%{x}</b><br>'+var_numerica+': <b>%{y}</b>',hoverlabel=dict(font_size=15)
     ))
     fig.add_trace(
         go.Scatter(
@@ -268,4 +268,51 @@ def figure_stock_alm_y2(df = None, height = 450 , moneda = 'Importe Dolares', ti
             fig.update_layout(bargap=0.4)
     elif size_list== 3:
             fig.update_layout(bargap=0.3)
+    return fig
+
+def bar_horizontal(df = None, height = 350 , x = '',y = '',name_x = '',name_y = '',color = '#3aa99b', title = ''):
+
+    fig = go.Figure()
+    #'Meses Inventario','Inventario Valorizado'
+    fig.add_trace(go.Bar(
+    x = df[x],
+    y = df[y],
+    name = '',
+    cliponaxis=False,
+    #marker=dict(color = color,cornerradius=15),
+    hovertemplate ='<br>'+name_y+': <b>%{y}</b><br>'+name_x+': <b>%{x:,.1f}</b>',hoverlabel=dict(font_size=13),
+    orientation='h'
+    ))
+    
+    fig.update_layout(
+        #legend=dict(orientation="v"),
+        #'<b>'+xaxis_title+'</b>'
+        yaxis=dict(
+            title=dict(text='<b>'+name_y+'</b>'),
+            side="left",
+            #range=[0, df['Meses Inventario'].max()]
+        ),
+        
+        xaxis_title='<b>'+name_x+'</b>',
+    )
+    
+    fig.update_layout(
+        title = f"<b>{title}</b>",
+        title_font_size = 20,
+        height = height,
+
+        #title_text="STOCK VALORIZADO Y NRO ITEMS POR MES Y AÑO",
+    )
+    fig.update_xaxes(showticklabels = True,)#,showgrid=True, gridwidth=1, gridcolor='black',
+    fig.update_yaxes(showticklabels = True,)  
+    fig.update_layout(yaxis_tickformat = ',')
+    fig.update_layout(margin=dict(r = 20, b = 40, t = 50))
+    size_list = len(df[y].unique())
+    if  size_list== 1:
+            fig.update_layout(bargap=0.7)
+    elif size_list== 2:
+            fig.update_layout(bargap=0.4)
+    elif size_list== 3:
+            fig.update_layout(bargap=0.3)
+    
     return fig

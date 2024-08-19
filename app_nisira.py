@@ -1,7 +1,7 @@
 import streamlit as st
 from constants import LOGO_NISIRA
 from apps.login import login_2
-from routes import page_dict,account_pages
+from routes import pages_rol,account_pages
 from utils.auth import get_data_user
 from utils.data_transform import decoding_avatar
 
@@ -45,7 +45,7 @@ if st.session_state['logged_in']:
         st.session_state['profile_rol'] = data[10]
         
         
-        pg = st.navigation( page_dict | {"Account": account_pages})
+        pg = st.navigation( pages_rol(role=st.session_state['profile_rol'],rubro = st.session_state['empresa_rubro']) | {"Account": account_pages})
         st.logo(st.session_state['empresa_img'])
         st.markdown(
             f"""

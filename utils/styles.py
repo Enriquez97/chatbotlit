@@ -6,11 +6,14 @@ def styles(pt = 3):
                .block-container {
                     padding-top: %srem;
                     padding-bottom: 0rem;
-                    padding-left: 5rem;
-                    padding-right: 5rem;
+                    padding-left: 2.5rem;
+                    padding-right: 2.5rem;
                 }
                 [data-testid="stVerticalBlockBorderWrapper"]{
                     padding: 1px;
+                }
+                [data-testid="stHeader"]{
+                    height: 2.5rem;
                 }
                 
         </style>

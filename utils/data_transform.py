@@ -4,6 +4,8 @@ import base64
 from io import BytesIO
 from PIL import Image
 
+
+
 def decoding_avatar(img_code = None,width = 200, height = 50): 
     code = base64.b64decode(img_code)
     return Image.open(BytesIO(code)).resize((width, height))
@@ -24,7 +26,7 @@ def cal_trim(mes):
     
 def meses_inventario(cpm,stock):
     if cpm == 0:
-        return None
+        return "NO ROTA"
     else:
         return round(stock/cpm,2)    
     

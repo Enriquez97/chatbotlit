@@ -52,13 +52,13 @@ async def fetch_data_from_api(ip = None, token = None,sp = None, params = None):
         obj_ = obj['objeto']
         return obj_
     
-@st.cache_data() 
+@st.cache_data(ttl=600) #ttl=600
 def send_get_dataframe(ip = "",token="", params=None, endpoint=""):
         base_url = f'http://{ip}:3005/api/consulta'
         token = token
         headers = {"Authorization": f"Bearer {token}"}
         url = f"{base_url}/{endpoint}"
-        response = requests.get(url, headers=headers,params = params)
+        response = requests.get(url, headers=headers,params = params,timeout=(600, 600))#1200
         obj = response.json()
         obj_ = obj['objeto']
         return pd.DataFrame(obj_)

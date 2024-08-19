@@ -17,11 +17,14 @@ class Produccion:
     def ejecucion_campania():
         styles(pt=1)
         if st.session_state['servicio_ip']:
-            consumidores_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_consumidores")
-            variedad_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_variedades_cultivos")
-            cultivos_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_cultivos")
-            fertilizacion_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_plan_fertilizacion")
-            df = cleanVariablesAgricolas(consumidores_df,variedad_df,cultivos_df,fertilizacion_df)
+            if st.session_state['empresa_name'] =="NISIRA":
+                df = pd.read_parquet('./source/data/agricola_.parquet', engine='pyarrow')
+            else:
+                consumidores_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_consumidores")
+                variedad_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_variedades_cultivos")
+                cultivos_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_cultivos")
+                fertilizacion_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_plan_fertilizacion")
+                df = cleanVariablesAgricolas(consumidores_df,variedad_df,cultivos_df,fertilizacion_df)
             #df = pd.read_parquet('./source/data/agricola_.parquet', engine='pyarrow')
             print(df.columns)
             st.title("Ejecución de Campaña :herb:")
@@ -167,14 +170,18 @@ class Produccion:
     def costos_campania():
         styles(pt=1)
         if st.session_state['servicio_ip']:
-            df_costos_campana = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_detalle_costos_campana")
-            consumidores_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_consumidores")
-            variedad_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_variedades_cultivos")
-            cultivos_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_cultivos")
+            if st.session_state['empresa_name'] =="NISIRA":
+                df = pd.read_parquet('./source/data/costos.parquet', engine='pyarrow')
+            else:
+                
+                df_costos_campana = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_detalle_costos_campana")
+                consumidores_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_consumidores")
+                variedad_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_variedades_cultivos")
+                cultivos_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_cultivos")
             #fertilizacion_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_plan_fertilizacion")
             #df = cleanVariablesAgricolas(consumidores_df,variedad_df,cultivos_df,fertilizacion_df)
             
-            df= costosAgricolas(df_costos_campana,consumidores_df,cultivos_df,variedad_df)
+                df= costosAgricolas(df_costos_campana,consumidores_df,cultivos_df,variedad_df)
             print(df)
             print(df.info())
             #df = pd.read_parquet('./source/data/costos.parquet', engine='pyarrow')

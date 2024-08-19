@@ -9,7 +9,7 @@ from utils.data_transform import *
 from utils.charts_altair import ALTAIR
 from utils.charts_plotly import *
 from concurrent.futures import ThreadPoolExecutor
-
+import plotly.express as px
 class Logistica:
     
     def stocks():
@@ -145,7 +145,7 @@ class Logistica:
                 ALTAIR(dataframe = responsable_df,titulo = "Responsable",height = 350).bar(x = 'Número de Registros',y = "Responsable Ingreso",horizontal=True)
     
     def gestion_stock():
-        styles(pt=3)  
+        styles(pt=1)  
         if st.session_state['servicio_ip']:
             consumoalm_params = {'C_EMP':'001','C_SUC':'','C_ALM': '','C_FECINI':str(datetime.now()- timedelta(days = 6 * 30))[:8].replace('-', "")+str('01')  ,'C_FECFIN':str(datetime.now())[:10].replace('-', ""),'C_VALOR':'1','C_GRUPO':'','C_SUBGRUPO':'','C_TEXTO':'','C_IDPRODUCTO':'','LOTEP':'','C_CONSUMIDOR':''}
             saldosalm_params = {'EMPRESA':'001','SUCURSAL':'','ALMACEN': '','FECHA':str(datetime.now())[:10].replace('-', ""),'IDGRUPO':'','SUBGRUPO':'','DESCRIPCION':'','IDPRODUCTO':'','LOTEP':''}
@@ -166,41 +166,112 @@ class Logistica:
                 selected_grupo =st.selectbox("Grupo",list(sorted(saldos_api_alm_df["DSC_GRUPO"].unique())),index=None, placeholder="")#,list(sorted(df["Almacén"].unique())),index=None, placeholder=""
                 if selected_grupo != None:
                     saldos_api_alm_df = saldos_api_alm_df[saldos_api_alm_df['DSC_GRUPO'] == selected_grupo]
+                    consumos_api_alm_df = consumos_api_alm_df[consumos_api_alm_df['DSC_GRUPO'] == selected_grupo]
             with col_row_head[2]:
                 selected_subgrupo =st.selectbox("Subgrupo",list(sorted(saldos_api_alm_df["DSC_SUBGRUPO"].unique())),index=None, placeholder="")
                 if selected_subgrupo != None:
                     saldos_api_alm_df = saldos_api_alm_df[saldos_api_alm_df['DSC_SUBGRUPO'] == selected_subgrupo]
+                    consumos_api_alm_df = consumos_api_alm_df[consumos_api_alm_df['DSC_SUBGRUPO'] == selected_subgrupo]
             with col_row_head[3]:
                 selected_marca =st.selectbox("Marca",list(sorted(saldos_api_alm_df["MARCA"].unique())),index=None, placeholder="")
                 if selected_marca != None:
                     saldos_api_alm_df = saldos_api_alm_df[saldos_api_alm_df['MARCA'] == selected_marca]
             with col_row_head[4]:
-                input_cpm_min =st.number_input("Cpm Min",disabled=True)
+                input_cpm_min =st.number_input("Cpm Min",value=None)
             with col_row_head[5]:
-                input_cpm_max =st.number_input("Cpm Max",disabled=True)
+                input_cpm_max =st.number_input("Cpm Max",value=None)
             with col_row_head[6]:
                 selected_moneda = st.selectbox("Moneda", ("PEN","USD"))
                 
-            row_1 = st.columns([3,2,2,2,2,2])
+            row_1 = st.columns([3,10])
             with row_1[0]:
                 selected_sucursal =st.selectbox("Sucursal",list(sorted(saldos_api_alm_df["SUCURSAL"].unique())),index=None, placeholder="")
                 if selected_sucursal != None:
                     saldos_api_alm_df = saldos_api_alm_df[saldos_api_alm_df['SUCURSAL'] == selected_sucursal]
+                    consumos_api_alm_df = consumos_api_alm_df[consumos_api_alm_df['SUCURSAL'] == selected_sucursal]
                 selected_almacen =st.selectbox("Almacen",list(sorted(saldos_api_alm_df["ALMACEN"].unique())),index=None, placeholder="")
                 if selected_almacen != None:
                     saldos_api_alm_df = saldos_api_alm_df[saldos_api_alm_df['ALMACEN'] == selected_almacen]
-                input_codigo = st.text_input("Código o Descripción",disabled=True)
+                    consumos_api_alm_df = consumos_api_alm_df[consumos_api_alm_df['ALMACEN'] == selected_almacen]
+                input_codigo = st.text_input("Código o Descripción")
                 #btn = st.button("Reset", type="primary",use_container_width=True)
+            col_pu = 'PU_S' if selected_moneda == 'PEN' else 'PU_D'    
+            sig = 'S/.' if selected_moneda == 'PEN' else '$'
+            inv_val_moneda = 'INV_VALMOF' if selected_moneda == 'PEN' else 'INV_VALMEX'
+            
+            input_df = saldos_api_alm_df.groupby(['SUCURSAL','ALMACEN','DSC_GRUPO','DSC_SUBGRUPO','MARCA'])[['STOCK']].sum().reset_index() 
+            ##
+            #PRECIO UNITARIO PROM
+            precio_unit_prom = saldos_api_alm_df.groupby(['COD_PRODUCTO'])[[col_pu]].mean().reset_index()
+            precio_unit_prom = precio_unit_prom.rename(columns = {col_pu:'Precio Unitario Promedio'})
+            precio_unit_prom['Precio Unitario Promedio'] = precio_unit_prom['Precio Unitario Promedio'].fillna(0).round(2)
+
+            #
+            consumos_alm_df = consumos_api_alm_df.groupby(['IDPRODUCTO'])[['CANTIDAD']].sum().reset_index()
+            saldos_alm_group_df = saldos_api_alm_df.groupby(['DSC_GRUPO', 'DSC_SUBGRUPO', 'COD_PRODUCTO', 'DESCRIPCION', 'UM','MARCA'])[['PU_S','PU_D', 'STOCK', 'INV_VALMOF', 'INV_VALMEX']].sum().reset_index()
+            saldos_alm_group_df = saldos_alm_group_df[saldos_alm_group_df['STOCK']>0]
+            
+            dff = saldos_alm_group_df.merge(consumos_alm_df, how='left', left_on=["COD_PRODUCTO"], right_on=["IDPRODUCTO"])
+            
+            dff = dff.merge(precio_unit_prom,how='left', left_on=["COD_PRODUCTO"], right_on=["COD_PRODUCTO"])
+            dff.loc[dff.MARCA =='','MARCA']='NO ESPECIFICADO'   
+            
+            dff['CANTIDAD'] = dff['CANTIDAD'].fillna(0)
+            dff['STOCK'] = dff['STOCK'].fillna(0)
+            dff['Precio Unitario'] = dff[col_pu].fillna(0)
+            dff['CANTIDAD'] = dff['CANTIDAD']/6
+            dff['CANTIDAD'] = dff['CANTIDAD'].round(2)
+            dff['Meses Inventario'] = dff.apply(lambda x: meses_inventario(x['CANTIDAD'],x['STOCK']),axis=1)
+            dff['TI'] = 1/dff['CANTIDAD']
+            dff['TI'] = dff['TI'].replace([np.inf],0)
+            
+            if input_codigo != None:
+                dff = dff[(dff['COD_PRODUCTO'].str.contains(input_codigo))|(dff['DESCRIPCION'].str.contains(input_codigo))]
+            
+            if input_cpm_min != None and input_cpm_max != None:
+                dff = dff[(dff['CANTIDAD']>=input_cpm_min)&(dff['CANTIDAD']<=input_cpm_max)]
+            
+            cpm = round(dff['CANTIDAD'].mean(),2)
+            invval = f"{sig}{(int(round(dff[inv_val_moneda].sum(),0))):,}"
+            meses_invet_prom = dff[dff['Meses Inventario']!='NO ROTA']
+            stock = round(meses_invet_prom['Meses Inventario'].mean(),2)
+            consumo = round(dff['TI'].mean(),2)
+            total_stock = f"{(int(round(dff['STOCK'].sum(),0))):,}"
+            
+            mi_dff = dff[(dff['Meses Inventario']!='NO ROTA')]
+            mi_dff = mi_dff[mi_dff['Meses Inventario']>0]
+            
+            df_mi_ =mi_dff.groupby(['COD_PRODUCTO','DESCRIPCION'])[['Meses Inventario']].sum().sort_values('Meses Inventario').reset_index().tail(30)
+            df_mi_ = df_mi_.rename(columns = {"DESCRIPCION":'Producto'})
+            fig_1 = px.bar(df_mi_, x='Producto', y= 'Meses Inventario', title = "Meses de Inventario Promedio por Producto")
+            fig_1.update_layout(autosize=True,margin=dict(t = 40,b=10),height=270)
+            fig_1.update_xaxes(showticklabels = False)
+            df_table = dff[['DSC_GRUPO', 'DSC_SUBGRUPO', 'COD_PRODUCTO', 'DESCRIPCION', 'UM','MARCA','Precio Unitario Promedio', 'STOCK', inv_val_moneda,'IDPRODUCTO', 'CANTIDAD', 'Meses Inventario','TI']]
+            df_table = df_table.drop(['IDPRODUCTO'], axis=1)
+            df_table = df_table.rename(columns = {"DSC_GRUPO":'Grupo',"DSC_SUBGRUPO":"Subgrupo","COD_PRODUCTO":"Código","DESCRIPCION":"Producto","UM":"UMD","MARCA":"Marca","STOCK":"Stock",inv_val_moneda:f'Inventario Valorizado {selected_moneda}','CANTIDAD': f'Consumo Promedio Mensual','Meses Inventario':'Meses de Inventario'})
+            
+            
+            sucursal_df = saldos_api_alm_df.groupby(['SUCURSAL'])[[inv_val_moneda]].sum().sort_values(inv_val_moneda).reset_index()
+            almacen_df = saldos_api_alm_df.groupby(['ALMACEN'])[[inv_val_moneda]].sum().sort_values(inv_val_moneda).reset_index()
+            grupo_df = saldos_api_alm_df.groupby(['DSC_GRUPO'])[[inv_val_moneda]].sum().sort_values(inv_val_moneda).reset_index()
+            
+            
+            
             with row_1[1]:
-                st.metric("CPM", "0", "4%",label_visibility="visible",help="Consumo Promedio Mensual")
-            with row_1[2]:
-                st.metric("INV VAL", "0", "4%",label_visibility="visible")
-            with row_1[3]:
-                st.metric("TOTAL STOCK", "0", "4%",label_visibility="visible")
-            with row_1[4]:
-                st.metric("TI STOCK", "0", "4%",label_visibility="visible")
-            with row_1[5]:
-                st.metric("TI CON", "0", "4%",label_visibility="visible")
-            st.dataframe(saldos_api_alm_df)
+                row_in_row_1 = st.columns(5)
+                row_in_row_1[0].metric("CPM", cpm, "",label_visibility="visible",help="Consumo Promedio Mensual")
+                row_in_row_1[1].metric("INV VAL", invval, "",label_visibility="visible",help="Inventario Valorizado")
+                row_in_row_1[2].metric("TOTAL STOCK", total_stock, "",label_visibility="visible")
+                row_in_row_1[3].metric("TI STOCK", stock, "",label_visibility="visible")
+                row_in_row_1[4].metric("TI CON", consumo, "",label_visibility="visible")
+                st.plotly_chart(fig_1,theme="streamlit")
+                
+            with st.expander("Detalle"):
+                st.dataframe(df_table,hide_index=True)
+            
+            row_2= st.columns(3)
+            row_2[0].plotly_chart(bar_horizontal(df = sucursal_df, height = 350, x= inv_val_moneda, y = 'SUCURSAL', name_x='Inventario Valorizado', name_y='Sucursal',title = "Sucursal por Inventario Valorizado",color = 'rgb(95, 70, 144)'),theme="streamlit")
+            row_2[1].plotly_chart(bar_horizontal(df = almacen_df, height = 350, x= inv_val_moneda, y = 'ALMACEN', name_x='Inventario Valorizado', name_y='Almacen',title = "Almacen por Inventario Valorizado",color ='rgb(29, 105, 150)'),theme="streamlit")
+            row_2[2].plotly_chart(bar_horizontal(df = grupo_df, height = 350, x= inv_val_moneda, y = 'DSC_GRUPO', name_x='Inventario Valorizado', name_y='Grupo Producto',title = "Grupo Producto por Inventario Valorizado",color = 'rgb(56, 166, 165)'),theme="streamlit")
             #if btn:
             #    st.write("test")

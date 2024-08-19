@@ -39,7 +39,7 @@ def login_2():
         margin-top: 1px;
     }
     [data-testid="stForm"]{
-        width : 450px;
+        width : 380px;
         align-self : center;
     }
     </style>

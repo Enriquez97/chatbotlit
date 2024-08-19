@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.auth import authenticate
-from streamlit_cookies_manager import EncryptedCookieManager
+
 #cookies = EncryptedCookieManager(
 #    prefix="streamlit_login_",
 #    password="my_secret_password",  # Cambia esto a una contraseña segura

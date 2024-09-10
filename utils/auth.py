@@ -1,6 +1,5 @@
 import streamlit as st
-import aiomysql
-import asyncio
+
 import mysql.connector
 from decouple import config
 from passlib.context import CryptContext
@@ -36,12 +35,9 @@ def authenticate(username, password):
     user = cursor.fetchone()
     cursor.close()
     conn.close()
-    print(user)
     if user:
         stored_username, stored_password_hash = user
-        print(stored_username)
         if pwd_context.verify(password, stored_password_hash):
-            print(stored_username)
             return stored_username
     
     return None

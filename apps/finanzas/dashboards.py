@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 import altair as alt
 import plotly.express as px
-import altair as alt
+
 import altair as alt
 from utils.styles import styles
 from utils.api import APIConnector,send_get_dataframe
@@ -26,7 +26,7 @@ class Finanzas:
             df_bg["Mes_"] = df_bg["Mes_"].astype("string")
             test_dff = df_bg.groupby(["titulo1","titulo2","titulo3"]).count().reset_index()
             st.title("Balance General")
-            st.dataframe(test_dff)
+            #st.dataframe(test_dff)
             col_formato,col_year,col_tri,col_mes,col_moneda= st.columns([3,2,2,2,1])
 
             with col_formato:

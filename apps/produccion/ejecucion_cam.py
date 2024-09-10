@@ -26,7 +26,7 @@ class Produccion:
                 fertilizacion_df=send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_datos_plan_fertilizacion")
                 df = cleanVariablesAgricolas(consumidores_df,variedad_df,cultivos_df,fertilizacion_df)
             #df = pd.read_parquet('./source/data/agricola_.parquet', engine='pyarrow')
-            print(df.columns)
+            
             st.title("Ejecución de Campaña :herb:")
 
             columns = st.columns(5)
@@ -182,8 +182,7 @@ class Produccion:
             #df = cleanVariablesAgricolas(consumidores_df,variedad_df,cultivos_df,fertilizacion_df)
             
                 df= costosAgricolas(df_costos_campana,consumidores_df,cultivos_df,variedad_df)
-            print(df)
-            print(df.info())
+            
             #df = pd.read_parquet('./source/data/costos.parquet', engine='pyarrow')
 
             #data_test = filter_dataframe([4,4,4],df, {"Año":"AÑO_CAMPAÑA","Variedad":"VARIEDAD","Lote":"CONSUMIDOR"})

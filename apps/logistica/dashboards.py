@@ -150,11 +150,14 @@ class Logistica:
             consumoalm_params = {'C_EMP':'001','C_SUC':'','C_ALM': '','C_FECINI':str(datetime.now()- timedelta(days = 6 * 30))[:8].replace('-', "")+str('01')  ,'C_FECFIN':str(datetime.now())[:10].replace('-', ""),'C_VALOR':'1','C_GRUPO':'','C_SUBGRUPO':'','C_TEXTO':'','C_IDPRODUCTO':'','LOTEP':'','C_CONSUMIDOR':''}
             saldosalm_params = {'EMPRESA':'001','SUCURSAL':'','ALMACEN': '','FECHA':str(datetime.now())[:10].replace('-', ""),'IDGRUPO':'','SUBGRUPO':'','DESCRIPCION':'','IDPRODUCTO':'','LOTEP':''}
             
-            with ThreadPoolExecutor(max_workers=2) as executor:
-                consumos_api_alm_df = executor.submit(send_get_dataframe,st.session_state['servicio_ip'],st.session_state['servicio_key'],consumoalm_params,"NSP_OBJREPORTES_CONSUMOSALM_DET_BI").result()
-                saldos_api_alm_df = executor.submit(send_get_dataframe,st.session_state['servicio_ip'],st.session_state['servicio_key'],saldosalm_params,"NSP_OBJREPORTES_SALDOSALMACEN_BI").result()
+            @st.cache_data(ttl=600)
+            def threadpool_data(ip: None, tk: None):
+                with ThreadPoolExecutor(max_workers=2) as executor:
+                    consumos_api_alm_df = executor.submit(send_get_dataframe,ip,tk,consumoalm_params,"NSP_OBJREPORTES_CONSUMOSALM_DET_BI").result()
+                    saldos_api_alm_df = executor.submit(send_get_dataframe,ip,tk,saldosalm_params,"NSP_OBJREPORTES_SALDOSALMACEN_BI").result()
+                return consumos_api_alm_df,saldos_api_alm_df
             
-            
+            consumos_api_alm_df,saldos_api_alm_df = threadpool_data(st.session_state['servicio_ip'],st.session_state['servicio_key'])
             saldos_api_alm_df = change_cols_saldosalm(saldos_api_alm_df)
             #input_df = saldos_api_alm_df.groupby(['SUCURSAL','ALMACEN','DSC_GRUPO','DSC_SUBGRUPO','MARCA'])[['STOCK']].sum().reset_index()
             #print(consumos_api_alm_df,saldos_api_alm_df)

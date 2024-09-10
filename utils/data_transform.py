@@ -102,6 +102,7 @@ def transform_nsp_stocks(df = None):
                      
           }
     )
+    df["Rango antigüedad del stock"] = df["Rango antigüedad del stock"].replace([np.nan],['NO ESPECIFICADO'])
     return df
 
 def transform_stockalmval(df = None):
@@ -118,8 +119,8 @@ def transform_stockalmval(df = None):
     df['RESPONSABLEINGRESO'] = df['RESPONSABLEINGRESO'].apply(lambda x: x.strip())
     df['RESPONSABLESALIDA'] = df['RESPONSABLESALIDA'].fillna('No Especificado')
     df['RESPONSABLESALIDA'] = df['RESPONSABLESALIDA'].apply(lambda x: x.strip())
-    df['ULTFECHAINGRESO'] = pd.to_datetime(df['ULTFECHAINGRESO'].str[:-14], format="%Y-%m-%d")
-    df['ULTFECHASALIDA'] = pd.to_datetime(df['ULTFECHASALIDA'].str[:-14], format="%Y-%m-%d")
+    df['ULTFECHAINGRESO'] = pd.to_datetime(df['ULTFECHAINGRESO'].str[:10], format="%Y-%m-%d")
+    df['ULTFECHASALIDA'] = pd.to_datetime(df['ULTFECHASALIDA'].str[:10], format="%Y-%m-%d")
     df['Duracion_Inventario'] = df['ULTFECHASALIDA']-df['ULTFECHAINGRESO']
     df['Duracion_Inventario'] = (df['Duracion_Inventario'].dt.days)
     df= df[df["ULTFECHAINGRESO"].notna()]
@@ -156,6 +157,7 @@ def transform_stockalmval(df = None):
         'desde'      : 'Desde',
         'hasta'      : 'Hasta'
     })
+    #dff['Última Fecha Ingreso']=dff['Última Fecha Ingreso'].apply(lambda a: pd.to_datetime(a).date())
     return dff
 
 def change_cols_saldosalm(df = None):
@@ -317,7 +319,7 @@ def cleanVariablesAgricolas(df_consumidores,df_variedad,df_cultivos,df_fertiliza
     for anio in df_general['AÑO_CAMPAÑA'].unique():
         for i in cultivo:
             df_general['AÑO_CULTIVO'].loc[df_general['AÑO_CAMPAÑA']==anio]=df_general['AÑO_CULTIVO'].replace(i,str(anio)+'-'+str(i))    
-    print(df_general.columns)    
+    
     return df_general
 
 def costosAgricolas(df_costos_campana,df_consumidores,df_cultivos,df_variedad):

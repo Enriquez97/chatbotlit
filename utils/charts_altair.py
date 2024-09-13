@@ -15,9 +15,9 @@ class ALTAIR:
     def bar(self, x = "", y = "", horizontal = False, sort = True, mark_text = True):
         if horizontal == True:
                 chart = (alt.Chart(self.dataframe).mark_bar()
-                    .encode(x = x, 
+                    .encode(x = f"{x}:Q", 
                             y=alt.Y(y).sort('-x') if sort == True else y,
-                            text = x, 
+                            text = f"{x}:Q", 
                             tooltip=[y, alt.Tooltip(f'{x}:Q', format=',.2f')],
                     )
                     .properties(

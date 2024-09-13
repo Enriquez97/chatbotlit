@@ -20,15 +20,14 @@ class Comercial:
         styles(pt=1)    
         
         if st.session_state['servicio_ip']:
-            
+            #st.session_state['servicio_parquet'] = data[9]
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_rpt_ventas_detallado")
-            if st.session_state['empresa_name'] == "GRUPO RESEDISA S.A.C.":
-                dataframe =  pd.read_parquet("source/data/RESEDISA/nsp_rpt_ventas_detallado_resedisa.parquet")
+            if st.session_state['servicio_parquet'] == True:
+                dataframe =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/nsp_rpt_ventas_detallado.parquet")
             else:
                 dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_rpt_ventas_detallado")
             df = transform_nsp_rpt_ventas_detallado(dataframe)
             
-            print(df.columns)
             
             st.title("Informe de Ventas")
             columns_filters =  st.columns([1,2,2,2,2,2,1])
@@ -61,8 +60,11 @@ class Comercial:
                 importe = "Importe Soles" if selected_moneda == "PEN" else "Importe Dolares"
             
             productos_df_20=df.groupby(['Producto','Grupo Producto','Subgrupo Producto'])[[importe]].sum().sort_values(importe,ascending=True).tail(20).reset_index()
+            productos_df_20[importe] = productos_df_20[importe].astype(float)
             vendedor_df = df.groupby(['Vendedor'])[[importe]].sum().sort_values(importe,ascending=True).reset_index()
+            vendedor_df[importe] = vendedor_df[importe].astype(float)
             departamento_df = df.groupby(['Departamento'])[[importe]].sum().sort_values(importe,ascending=True).reset_index()
+            departamento_df[importe] = departamento_df[importe].astype(float)
             #meses_df_12 = df.groupby(['Mes','Mes Num'])[[importe]].sum().reset_index().sort_values('Mes Num',ascending=True).reset_index()
             fecha_df =df.groupby(["Fecha"])[[importe]].sum().reset_index()
             #meses_df_12['Porcentaje']=(meses_df_12[importe]/meses_df_12[importe].sum())*100
@@ -71,6 +73,7 @@ class Comercial:
             subgrupo_p_df = df.groupby(["Subgrupo Producto"])[[importe]].sum().sort_values(importe,ascending=True).reset_index()
             grupo_c_df = df.groupby(["Grupo Cliente"])[[importe]].sum().sort_values(importe,ascending=True).reset_index()
             
+            print(productos_df_20.info())
             col_row_1 = st.columns([5,3.5,3.5])
             with col_row_1[0]:
                 ALTAIR(dataframe = productos_df_20,titulo = "Ranking 20 Productos",height = 350).bar(x = importe,y = "Producto",horizontal=True)
@@ -111,8 +114,8 @@ class Comercial:
         
         if st.session_state['servicio_ip']:
             
-            if st.session_state['empresa_name'] == "GRUPO RESEDISA S.A.C.":
-                dataframe =  pd.read_parquet("source/data/RESEDISA/nsp_rpt_ventas_detallado_resedisa.parquet")
+            if st.session_state['servicio_parquet'] == True:
+                dataframe =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/nsp_rpt_ventas_detallado.parquet")
             else:
                 dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_rpt_ventas_detallado")
             df = transform_nsp_rpt_ventas_detallado(dataframe)

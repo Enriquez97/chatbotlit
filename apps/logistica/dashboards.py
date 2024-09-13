@@ -15,7 +15,10 @@ class Logistica:
     def stocks():
         styles(pt=3)  
         if st.session_state['servicio_ip']:
-            dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_stocks")
+            if st.session_state['servicio_parquet'] == True:
+                dataframe =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/nsp_stocks.parquet")
+            else: 
+                dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_stocks")
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_stocks")
             df = transform_nsp_stocks(dataframe)
             
@@ -42,8 +45,11 @@ class Logistica:
             
             ## AGRUPACIONES
             moneda = 'Soles' if selected_moneda == 'PEN' else 'Dolares'
+            st.write(df.shape)
             gp_dff = df.groupby(["Grupo Producto"])[[valorizado]].sum().reset_index() 
+            gp_dff[valorizado] = gp_dff[valorizado].astype(float)
             top_10_df= df.groupby(['Producto'])[[valorizado]].sum().sort_values([valorizado],ascending = True).tail(10).reset_index()   
+            top_10_df[valorizado] = top_10_df[valorizado].astype(float)
             rango_stock_df = df.groupby(['Rango antigüedad del stock'])[[valorizado]].sum().sort_values(['Rango antigüedad del stock']).reset_index()
             rango_stock_count_df = df.groupby(['Rango antigüedad del stock'])[['Producto']].count().sort_values(['Rango antigüedad del stock']).reset_index()
             #pr_dff = df.groupby([""])[[valorizado]].sum().reset_index() 
@@ -74,12 +80,15 @@ class Logistica:
     def estado_inventario():
         styles(pt=1)  
         if st.session_state['servicio_ip']:
-            dataframe = send_get_dataframe(
-                ip = st.session_state['servicio_ip'],
-                token=st.session_state['servicio_key'], 
-                endpoint="STOCKALMVAL",
-                params= { 'EMPRESA':'001','SUCURSAL':'','ALMACEN': '','FECHA':str(datetime.now())[:10].replace('-', ""), 'IDGRUPO':'','SUBGRUPO':'','DESCRIPCION':'','IDPRODUCTO':''}
-            )
+            if st.session_state['servicio_parquet'] == True:
+                dataframe =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/STOCKALMVAL.parquet")
+            else:
+                dataframe = send_get_dataframe(
+                    ip = st.session_state['servicio_ip'],
+                    token=st.session_state['servicio_key'], 
+                    endpoint="STOCKALMVAL",
+                    params= { 'EMPRESA':'001','SUCURSAL':'','ALMACEN': '','FECHA':str(datetime.now())[:10].replace('-', ""), 'IDGRUPO':'','SUBGRUPO':'','DESCRIPCION':'','IDPRODUCTO':''}
+                )
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_stocks")
             df = transform_stockalmval(dataframe)
             
@@ -156,8 +165,13 @@ class Logistica:
                     consumos_api_alm_df = executor.submit(send_get_dataframe,ip,tk,consumoalm_params,"NSP_OBJREPORTES_CONSUMOSALM_DET_BI").result()
                     saldos_api_alm_df = executor.submit(send_get_dataframe,ip,tk,saldosalm_params,"NSP_OBJREPORTES_SALDOSALMACEN_BI").result()
                 return consumos_api_alm_df,saldos_api_alm_df
+            if st.session_state['servicio_parquet'] == True:
+                consumos_api_alm_df =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/NSP_OBJREPORTES_CONSUMOSALM_DET_BI.parquet")
+                saldos_api_alm_df =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/NSP_OBJREPORTES_SALDOSALMACEN_BI.parquet")
+
+            else:
+                consumos_api_alm_df,saldos_api_alm_df = threadpool_data(st.session_state['servicio_ip'],st.session_state['servicio_key'])
             
-            consumos_api_alm_df,saldos_api_alm_df = threadpool_data(st.session_state['servicio_ip'],st.session_state['servicio_key'])
             saldos_api_alm_df = change_cols_saldosalm(saldos_api_alm_df)
             #input_df = saldos_api_alm_df.groupby(['SUCURSAL','ALMACEN','DSC_GRUPO','DSC_SUBGRUPO','MARCA'])[['STOCK']].sum().reset_index()
             #print(consumos_api_alm_df,saldos_api_alm_df)
@@ -223,9 +237,12 @@ class Logistica:
             dff['STOCK'] = dff['STOCK'].fillna(0)
             dff['Precio Unitario'] = dff[col_pu].fillna(0)
             dff['CANTIDAD'] = dff['CANTIDAD']/6
-            dff['CANTIDAD'] = dff['CANTIDAD'].round(2)
+            dff['CANTIDAD'] = dff['CANTIDAD'].round(5)
             dff['Meses Inventario'] = dff.apply(lambda x: meses_inventario(x['CANTIDAD'],x['STOCK']),axis=1)
-            dff['TI'] = 1/dff['CANTIDAD']
+            try:
+                dff['TI'] = 1/dff['CANTIDAD'].astype(float)
+            except:
+                dff['TI'] = 0
             dff['TI'] = dff['TI'].replace([np.inf],0)
             
             if input_codigo != None:
@@ -234,7 +251,10 @@ class Logistica:
             if input_cpm_min != None and input_cpm_max != None:
                 dff = dff[(dff['CANTIDAD']>=input_cpm_min)&(dff['CANTIDAD']<=input_cpm_max)]
             
-            cpm = round(dff['CANTIDAD'].mean(),2)
+            try:
+                cpm = round(dff['CANTIDAD'].astype(float).mean(),2)
+            except:
+                cpm = "-"
             invval = f"{sig}{(int(round(dff[inv_val_moneda].sum(),0))):,}"
             meses_invet_prom = dff[dff['Meses Inventario']!='NO ROTA']
             stock = round(meses_invet_prom['Meses Inventario'].mean(),2)

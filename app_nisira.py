@@ -33,6 +33,7 @@ if 'logged_in' not in st.session_state:
 if st.session_state['logged_in']:
         
         data = get_data_user(st.session_state['username'])
+        #print(data)
         st.session_state['profile_img'] = f"data:image/jpeg;base64,{data[1]}"#decoding_avatar(,width=50,height=50)
         st.session_state['empresa_ruc'] = data[2]
         st.session_state['empresa_rubro'] = data[3]

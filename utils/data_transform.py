@@ -119,8 +119,8 @@ def transform_stockalmval(df = None):
     df['RESPONSABLEINGRESO'] = df['RESPONSABLEINGRESO'].apply(lambda x: x.strip())
     df['RESPONSABLESALIDA'] = df['RESPONSABLESALIDA'].fillna('No Especificado')
     df['RESPONSABLESALIDA'] = df['RESPONSABLESALIDA'].apply(lambda x: x.strip())
-    df['ULTFECHAINGRESO'] = pd.to_datetime(df['ULTFECHAINGRESO'].str[:10], format="%Y-%m-%d")
-    df['ULTFECHASALIDA'] = pd.to_datetime(df['ULTFECHASALIDA'].str[:10], format="%Y-%m-%d")
+    df['ULTFECHAINGRESO'] = pd.to_datetime(df['ULTFECHAINGRESO'].astype(str).str[:10], format="%Y-%m-%d")
+    df['ULTFECHASALIDA'] = pd.to_datetime(df['ULTFECHASALIDA'].astype(str).str[:10], format="%Y-%m-%d")
     df['Duracion_Inventario'] = df['ULTFECHASALIDA']-df['ULTFECHAINGRESO']
     df['Duracion_Inventario'] = (df['Duracion_Inventario'].dt.days)
     df= df[df["ULTFECHAINGRESO"].notna()]
@@ -223,7 +223,7 @@ def transform_nsp_rpt_ventas_detallado(dataframe = pd.DataFrame()):
     dataframe['Grupo Producto'] = dataframe['Grupo Producto'].str[5:]
     dataframe['Subgrupo Producto'] = dataframe['Subgrupo Producto'].str[4:]
     dataframe['Grupo Cliente'] = dataframe['Grupo Cliente'].str[3:]
-    dataframe['Fecha'] = pd.to_datetime(dataframe['Fecha'].str[:-14], format="%Y-%m-%d")
+    dataframe['Fecha'] = pd.to_datetime(dataframe['Fecha'].astype(str).str[:10], format="%Y-%m-%d")
     dataframe['Departamento'] = dataframe['Departamento'].fillna('NO ESPECIFICADO')
     dataframe['Sucursal'] = dataframe['Sucursal'].fillna('NO ESPECIFICADO')
     dataframe['Vendedor'] = dataframe['Vendedor'].fillna('NO ESPECIFICADO')

@@ -167,10 +167,14 @@ def figure_stock_var_y2(df = None, height = 450 , moneda = 'Soles', title = ""):
 def figure_bar_relative(df = None, height = 300, eje_color = 'ABC Ventas', title = '',var_numerico = 'Soles'):
     
     stock_abc_dff=df.groupby(['Año', 'Mes','Mes_',eje_color])[[var_numerico]].sum().sort_values(['Año','Mes_']).reset_index()
+    #stock_abc_dff[var_numerico] = stock_abc_dff[var_numerico].fillna(0)
     lista_letras = sorted(stock_abc_dff[eje_color].unique())
-    pivot_stick_adc_dff=stock_abc_dff.pivot_table(index=['Año', 'Mes','Mes_'],values=(var_numerico),columns=(eje_color)).sort_values(['Año','Mes_']).reset_index()
+    pivot_stick_adc_dff=stock_abc_dff.pivot_table(index=['Año', 'Mes','Mes_'],values=(var_numerico),columns=(eje_color),fill_value=0).sort_values(['Año','Mes_']).reset_index()#,fill_value=0
+    
     for letra in lista_letras:
+        
         pivot_stick_adc_dff[f'{letra} %'] = pivot_stick_adc_dff[letra]/(pivot_stick_adc_dff[lista_letras].sum(axis=1))
+        
     #pivot_stick_adc_dff['B %'] = pivot_stick_adc_dff['B']/(pivot_stick_adc_dff[['A','B','C']].sum(axis=1))
     #pivot_stick_adc_dff['C %'] = pivot_stick_adc_dff['C']/(pivot_stick_adc_dff[['A','B','C']].sum(axis=1))
     x_stock_abc = [pivot_stick_adc_dff['Año'],pivot_stick_adc_dff['Mes']]

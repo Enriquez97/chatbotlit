@@ -3,3 +3,6 @@ showSidebarNavigation = false
 
 [browser]
 gatherUsageStats = false
+
+[global]
+developmentMode = false

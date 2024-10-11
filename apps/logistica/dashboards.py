@@ -45,7 +45,8 @@ class Logistica:
             
             ## AGRUPACIONES
             moneda = 'Soles' if selected_moneda == 'PEN' else 'Dolares'
-            st.write(df.shape)
+            #st.write(df.shape)
+            #st.dataframe(df)
             gp_dff = df.groupby(["Grupo Producto"])[[valorizado]].sum().reset_index() 
             gp_dff[valorizado] = gp_dff[valorizado].astype(float)
             top_10_df= df.groupby(['Producto'])[[valorizado]].sum().sort_values([valorizado],ascending = True).tail(10).reset_index()   

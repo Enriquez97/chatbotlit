@@ -115,11 +115,13 @@ class Finanzas:
                 except:
                     corr_pivot_df['Fondo de Maniobra'] = corr_pivot_df['ACTIVO CORRIENTE'] - corr_pivot_df['PASIVOS CORRIENTES']
                 fondo_mani_df = corr_pivot_df.groupby(['Mes_num','Mes_'])[['Fondo de Maniobra']].sum().sort_values('Mes_num',ascending = True).reset_index()
+                fondo_mani_df["Fondo de Maniobra"] = fondo_mani_df["Fondo de Maniobra"].astype(float)
+                #st.dataframe(fondo_mani_df)
                 g = (
                 alt.Chart(fondo_mani_df) 
                 .mark_bar()
                 .encode(x=alt.X('Mes_:N', title="Mes", sort= custom_order), 
-                        y="Fondo de Maniobra",
+                        y="Fondo de Maniobra:Q",
                         text="Fondo de Maniobra", 
                         tooltip=[ "Mes_",alt.Tooltip(f'{"Fondo de Maniobra"}:Q', format=',.2f')],
                         

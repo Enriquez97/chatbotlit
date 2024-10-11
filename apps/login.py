@@ -1,6 +1,6 @@
 import streamlit as st
 from utils.auth import authenticate
-
+#from apps.cookies import cookie_controller
 #cookies = EncryptedCookieManager(
 #    prefix="streamlit_login_",
 #    password="my_secret_password",  # Cambia esto a una contraseña segura
@@ -61,7 +61,7 @@ def login_2():
         authenticated_user = authenticate(username, password)
         if submitted:  
             if authenticated_user:
-                
+                #cookie_controller.set("logged_in",authenticated_user)
                 st.session_state['username'] = username   
                 st.session_state['logged_in'] = authenticated_user
                 #cookies["username"] = username

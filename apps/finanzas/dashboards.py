@@ -13,7 +13,7 @@ from utils.charts_plotly import *
 
 class Finanzas:    
     def balance_general():
-        styles(pt=1)
+        styles(pt=0)
         if st.session_state['servicio_ip']:
             if st.session_state['servicio_parquet'] == True:
                 dataframe =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/nsp_etl_situacion_financiera.parquet")

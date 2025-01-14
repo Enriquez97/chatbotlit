@@ -106,6 +106,10 @@ def figure_stock_var_y2(df = None, height = 450 , moneda = 'Soles', title = ""):
     stock_items_df = df.groupby(['Año', 'Mes','Mes_'])[[var_numerica]].count().sort_values(['Año','Mes_']).reset_index()
     stock_items_df = stock_items_df.rename(columns = {var_numerica:'Nro Items'})
     stock_var_items_df = stock_var_df.merge(stock_items_df,how = 'inner',on=["Año","Mes","Mes_"])
+    stock_var_items_df["Año"] = stock_var_items_df["Año"].astype(int)
+    #stock_var_items_df["Mes"] = stock_var_items_df["Mes"].astype(str)
+    stock_var_items_df = stock_var_items_df.sort_values(['Año','Mes_'])
+    print(stock_var_items_df)
     fig = go.Figure()
 
     fig.add_trace(go.Bar(
@@ -122,6 +126,7 @@ def figure_stock_var_y2(df = None, height = 450 , moneda = 'Soles', title = ""):
             y=stock_var_items_df['Nro Items'],
             yaxis="y2",
             name="Nro Items",
+            #category_orders = {'Mes': ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Set', 'Oct', 'Nov', 'Dic']},
             #marker=dict(color="crimson"),
             cliponaxis=False,
             hovertemplate ='<br>'+'Periodo'+': <b>%{x}</b><br>'+'Nro Items'+': <b>%{y}</b>',hoverlabel=dict(font_size=15)
@@ -162,6 +167,8 @@ def figure_stock_var_y2(df = None, height = 450 , moneda = 'Soles', title = ""):
     fig.update_xaxes(tickfont=dict(size=14),showticklabels = True,title_font_size = 13,automargin=True)#,showgrid=True, gridwidth=1, gridcolor='black',
     fig.update_yaxes(tickfont=dict(size=14),showticklabels = True,title_font_size = 13,automargin=True)  
     fig.update_layout(yaxis_tickformat = ',')
+    #fig.update_xaxes( categoryarray= [stock_var_items_df['Año'],stock_var_items_df['Mes']])#categoryorder='array',
+    #fig.update_xaxes(categoryorder='array', categoryarray= [stock_var_items_df['Año'],stock_var_items_df['Mes']])#
     return fig
 
 def figure_bar_relative(df = None, height = 300, eje_color = 'ABC Ventas', title = '',var_numerico = 'Soles'):

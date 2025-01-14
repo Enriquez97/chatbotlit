@@ -13,7 +13,7 @@ import plotly.express as px
 class Logistica:
     
     def stocks():
-        styles(pt=3)  
+        styles(pt=1)  
         if st.session_state['servicio_ip']:
             if st.session_state['servicio_parquet'] == True:
                 dataframe =  pd.read_parquet(f"http://{st.session_state['servicio_ip']}:3005/read-parquet/nsp_stocks.parquet")
@@ -21,14 +21,14 @@ class Logistica:
                 dataframe = send_get_dataframe(ip = st.session_state['servicio_ip'],token=st.session_state['servicio_key'], endpoint="nsp_stocks")
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_stocks")
             df = transform_nsp_stocks(dataframe)
+            years = list(sorted(df["Año"].unique()))
             
-            #print(df.columns)
             
             col_row_head = st.columns([4,2,2,2,1])
             with col_row_head[0]:
                 st.title("Stocks")
             with col_row_head[1]:
-                selected_year =st.selectbox("Año",list(sorted(df["Año"].unique())),index=None, placeholder="")
+                selected_year =st.selectbox("Año",years, placeholder="")
                 if selected_year != None:
                     df = df[df['Año'] == selected_year]
             with col_row_head[2]:
@@ -55,6 +55,7 @@ class Logistica:
             rango_stock_count_df = df.groupby(['Rango antigüedad del stock'])[['Producto']].count().sort_values(['Rango antigüedad del stock']).reset_index()
             #pr_dff = df.groupby([""])[[valorizado]].sum().reset_index() 
             fig_stock_var_y2 = figure_stock_var_y2(df=df, height = 330, moneda = moneda,title="Stock Valorizado y N° Items por mes y año")
+            #st.dataframe(fig_stock_var_y2)
             fig_pie_stock = pie_(df = rango_stock_df,label_col = 'Rango antigüedad del stock', value_col = valorizado,title = "Stock Valorizado segun Antigüedad", textinfo = 'percent+label+value' , textposition = 'inside',height = 330, showlegend = False, textfont_size = 12, hole = 0,)
             fig_pie_stock_count = pie_(df = rango_stock_count_df,label_col = 'Rango antigüedad del stock', value_col = 'Producto',title = "Nro Items segun Antigüedad", textinfo = 'percent+label+value' , textposition = 'inside',height = 330, showlegend = False, textfont_size = 12, hole = 0,)
             fig_bar_realative_ventas = figure_bar_relative(df = df, height = 330, eje_color = 'ABC Ventas', title = 'Porcentaje Stock por ABC Ventas', var_numerico = valorizado)
@@ -91,6 +92,7 @@ class Logistica:
                     params= { 'EMPRESA':'001','SUCURSAL':'','ALMACEN': '','FECHA':str(datetime.now())[:10].replace('-', ""), 'IDGRUPO':'','SUBGRUPO':'','DESCRIPCION':'','IDPRODUCTO':''}
                 )
             #dataframe = APIConnector(st.session_state['servicio_ip'],st.session_state['servicio_key']).send_get_dataframe(endpoint="nsp_stocks")
+            #st.dataframe(dataframe)
             df = transform_stockalmval(dataframe)
             
             df['Última Fecha Ingreso']=df['Última Fecha Ingreso'].apply(lambda a: pd.to_datetime(a).date())

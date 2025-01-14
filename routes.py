@@ -6,6 +6,7 @@ from apps.logistica.dashboards import Logistica
 from apps.finanzas.dashboards import Finanzas
 from apps.produccion.ejecucion_cam import Produccion
 
+
 inicio = [st.Page(home,title="Home",icon = ":material/home:",)]
 produccion = [
     st.Page(Produccion.ejecucion_campania,title="Ejecución Campaña",icon = ":material/psychiatry:",),

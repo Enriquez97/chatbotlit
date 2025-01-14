@@ -1,14 +1,12 @@
 import streamlit as st
 from utils.auth import authenticate
-#from apps.cookies import cookie_controller
-#cookies = EncryptedCookieManager(
-#    prefix="streamlit_login_",
-#    password="my_secret_password",  # Cambia esto a una contraseña segura
-#)
-#if not cookies.ready():
-#    st.stop()
+from apps.cookies import cookies_manager,generate_session_token
+from datetime import datetime,timedelta
 
-def login_2():
+def login():
+    
+    cookie_manager = cookies_manager()
+    
     st.markdown("""
     <style>
     .container {
@@ -67,6 +65,11 @@ def login_2():
                 #cookies["username"] = username
                 
                 st.success(f"Bienvenido {authenticated_user[0]}")
+                session_token = generate_session_token()
+                expires_at = (datetime.now() + timedelta(hours=1)).isoformat()
+                expires_at_str = datetime.strptime(expires_at[:-7], '%Y-%m-%dT%H:%M:%S')
+                cookie_manager.set("session_token", session_token, expires_at=expires_at_str, key=f"session_{username}")
+                st.session_state['session_token'] = cookie_manager.get("session_token")
                 #cookies.save()
                 st.rerun()
             else:
